@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wasteland RPG</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { margin: 0; background: #222; overflow: hidden; font-family: sans-serif; }
+        #game-canvas { background: #34495e; display: block; }
+        .ui-panel {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 10px; color: white;
+        }
+        .shop-panel {
+            position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: center;
+        }
+        .btn-buy {
+            background: #f1c40f; border: none; padding: 15px; border-radius: 10px;
+            font-weight: bold; cursor: pointer; color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ui-panel">
+    📦 Ресурсы: <span id="res-count">0</span><br>
+    ⚡ Энергия: <span id="energy-count">100</span>
+</div>
+
+<canvas id="game-canvas"></canvas>
+
+<div class="shop-panel">
+    <button class="btn-buy" onclick="buyResources()">Купить 100 ресурсов (5 🌟)</button>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let player = { x: canvas.width/2, y: canvas.height/2, size: 30, speed: 5 };
+    let resources = 0;
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Рисуем сетку (открытый мир)
+        ctx.strokeStyle = "#3e5871";
+        for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+        for(let i=0; i<canvas.height; i+=50) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+
+        // Рисуем игрока
+        ctx.fillStyle = "#e74c3c";
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+        
+        requestAnimationFrame(draw);
+    }
+
+    // Управление тапами (игрок идет туда, где нажали)
+    window.onclick = (e) => {
+        player.x = e.clientX - player.size/2;
+        player.y = e.clientY - player.size/2;
+        tg.HapticFeedback.impactOccurred('light');
+    };
+
+    function buyResources() {
+        // Отправляем боту команду на покупку
+        tg.sendData("buy_100_res");
+    }
+
+    draw();
+</script>
+</body>
+</html>
